@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "chat")]
+#[sea_orm(table_name = "chat_role")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
@@ -15,19 +15,11 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::chat_x_chat_role_x_profile::Entity")]
     ChatXChatRoleXProfile,
-    #[sea_orm(has_many = "super::message::Entity")]
-    Message,
 }
 
 impl Related<super::chat_x_chat_role_x_profile::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ChatXChatRoleXProfile.def()
-    }
-}
-
-impl Related<super::message::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Message.def()
     }
 }
 

@@ -2,5 +2,8 @@
 
 pub use super::account::Entity as Account;
 pub use super::chat::Entity as Chat;
+pub use super::chat_role::Entity as ChatRole;
+pub use super::chat_x_chat_role_x_profile::Entity as ChatXChatRoleXProfile;
 pub use super::message::Entity as Message;
+pub use super::profile::Entity as Profile;
 pub use super::session::Entity as Session;

@@ -6,13 +6,15 @@ use axum::middleware::Next;
 use axum::routing::get;
 use axum_extra::extract::CookieJar;
 use dotenvy::dotenv;
+use endpoints::account::UserAccount;
 use hyper::{StatusCode, Request};
 use sea_orm::{DatabaseConnection, Database };
-use service::account::{AccountService, UserAccount};
+use service::account::AccountService;
 use tower_http::cors::{Any, CorsLayer};
 
 mod entities;
 mod service;
+mod endpoints;
 
 pub async fn establish_connection() -> DatabaseConnection {
     dotenv().ok();
@@ -34,7 +36,7 @@ async fn main() {
     let app = Router::new()
         .route("/api/me", get(print_user))
         .layer(axum::middleware::from_fn_with_state(account_service.clone(), authorize_from_session_cookie))
-        .nest("/api/account", service::account::routes(account_service.clone()))
+        .nest("/api/account", endpoints::account::routes(account_service.clone()))
         .layer(cors)
         ;
 

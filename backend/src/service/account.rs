@@ -1,57 +1,9 @@
-use axum::{response::IntoResponse, Router, routing::post, extract::State, Json};
+use axum::response::IntoResponse;
 use axum_extra::extract::{CookieJar, cookie::Cookie};
-use chrono::{Utc, NaiveDateTime};
+use chrono::Utc;
 use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, ColumnTrait, ActiveValue, ModelTrait};
-use serde::{Serialize, Deserialize};
-use crate::entities::{*, prelude::*};
-
-
-pub fn routes(state: AccountService) -> Router {
-    Router::new()
-        .route("/register", post(register))
-        .route("/login", post(login))
-        .with_state(state)
-}
-
-pub async fn register (
-    State(service): State<AccountService>,
-    Json(request): Json<RegistrationRequest>,
-) -> impl IntoResponse {
-    service.register_user(&request.email, &request.password).await
-}
-
-pub async fn login (
-    State(service): State<AccountService>,
-    Json(request): Json<LoginRequest>,
-) -> impl IntoResponse {
-    service.login_user(&request.email, &request.password).await
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RegistrationRequest {
-    email: String,
-    password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LoginRequest {
-    email: String,
-    password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct UserAccount {
-    pub id: i64,
-    pub email: String,
-    pub joined: NaiveDateTime,
-}
-
-impl From<account::Model> for UserAccount {
-    fn from(value: account::Model) -> Self {
-        Self { id: value.id, email: value.email.to_owned(), joined: value.joined }
-    }
-}
+use crate::{entities::{*, prelude::*}, endpoints::account::UserAccount};
 
 #[derive(Clone)]
 pub struct AccountService {
@@ -84,7 +36,18 @@ impl AccountService {
             ..Default::default()
         };
 
-        Account::insert(model)
+        let id = Account::insert(model)
+            .exec(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .last_insert_id;
+
+        let model = profile::ActiveModel {
+            id: ActiveValue::Set(id),
+            username: ActiveValue::Set("Username".to_string())
+        };
+
+        Profile::insert(model)
             .exec(&self.db)
             .await
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
