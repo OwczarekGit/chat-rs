@@ -1,0 +1,13 @@
+<form (ngSubmit)="$event.preventDefault()" [formGroup]="form">
+  <h2>Login</h2>
+  <label class="form-field">
+    <input placeholder="Email" type="email" formControlName="email"/>
+  </label>
+  <label class="form-field">
+    <input placeholder="Password" type="password" formControlName="password"/>
+  </label>
+  <div class="buttons">
+    <button [disabled]="!this.form.valid" (click)="login()">Login</button>
+    <button>Register</button>
+  </div>
+</form>

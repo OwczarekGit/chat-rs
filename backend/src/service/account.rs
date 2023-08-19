@@ -76,7 +76,7 @@ impl AccountService {
             .filter(session::Column::Key.eq(session_key))
             .one(&self.db)
             .await {
-            
+
             let _ = session.delete(&self.db).await;
         }
     }

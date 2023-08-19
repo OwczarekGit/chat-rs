@@ -1,0 +1,6 @@
+<div>
+  <app-chat-list-entry *ngFor="let c of chatService.chatList" [chatEntry]="c" (chatClicked)="selectChat($event)"></app-chat-list-entry>
+</div>
+<div>
+  <button [routerLink]="['chat/create']">Create chat</button>
+</div>

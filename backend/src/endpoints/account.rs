@@ -13,7 +13,7 @@ pub fn routes(state: AccountService) -> Router {
 }
 
 pub async fn register (
-    State(service): axum::extract::State<AccountService>,
+    State(service): State<AccountService>,
     Json(request): Json<RegistrationRequest>,
 ) -> impl IntoResponse {
     service.register_user(&request.email, &request.password).await
@@ -32,7 +32,7 @@ pub async fn logout (
 ) -> impl IntoResponse {
     let c = match cookies.get("JSESSIONID") {
         Some(cookie) => {
-            service.logout_user(cookie.name()).await;
+            service.logout_user(cookie.value()).await;
             cookies.remove(Cookie::build("JSESSIONID", "").path("/").finish())
         }
         None => cookies

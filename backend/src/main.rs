@@ -1,4 +1,5 @@
 use std::env;
+use std::sync::Arc;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Router, Extension, Json};
@@ -9,8 +10,12 @@ use dotenvy::dotenv;
 use endpoints::account::UserAccount;
 use hyper::{StatusCode, Request};
 use sea_orm::{DatabaseConnection, Database };
+use tokio::sync::Mutex;
 use service::account::AccountService;
 use tower_http::cors::{Any, CorsLayer};
+use crate::service::chat::ChatService;
+use crate::service::message::MessageService;
+use crate::service::notification::NotificationService;
 
 mod entities;
 mod service;
@@ -23,11 +28,25 @@ pub async fn establish_connection() -> DatabaseConnection {
     connection.clone()
 }
 
+#[derive(Clone)]
+pub struct MessageAppState {
+    pub message_service: MessageService,
+    pub notification_service: Arc<Mutex<NotificationService>>,
+}
+
 #[tokio::main]
 async fn main() {
     let connection = establish_connection().await;
 
-    let account_service = service::account::AccountService::new(connection.clone());
+    let account_service = AccountService::new(connection.clone());
+    let chat_service = ChatService::new(connection.clone());
+    let message_service = MessageService::new(connection.clone());
+    let notification_service = Arc::new(Mutex::new(NotificationService::new()));
+
+    let message_app_state = MessageAppState {
+        message_service: message_service.clone(),
+        notification_service: notification_service.clone()
+    };
 
     let cors = CorsLayer::new()
         .allow_methods(Any)
@@ -35,6 +54,9 @@ async fn main() {
 
     let app = Router::new()
         .route("/api/me", get(print_user))
+        .nest("/api/chat", endpoints::chat::routes(chat_service.clone()))
+        .nest("/api/message", endpoints::message::routes(message_app_state))
+        .nest("/api/notification", endpoints::notification::routes(notification_service.clone()))
         .layer(axum::middleware::from_fn_with_state(account_service.clone(), authorize_from_session_cookie))
         .nest("/api/account", endpoints::account::routes(account_service.clone()))
         .layer(cors)

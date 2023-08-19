@@ -1,6 +1,6 @@
 use sea_orm_migration::prelude::*;
 use super::m20230818_222729_create_chat_table::Chat;
-use super::m20230818_164458_create_account_table::Account;
+use super::m20230819_115126_create_profile_table::Profile;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -28,11 +28,11 @@ impl MigrationTrait for Migration {
                             .from(Message::Table, Message::ChatId)
                             .to(Chat::Table, Chat::Id)
                     )
-                    .col(ColumnDef::new(Message::AuthorId).big_integer().not_null())
+                    .col(ColumnDef::new(Message::ProfileId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .from(Message::Table, Message::AuthorId)
-                            .to(Account::Table, Account::Id)
+                            .from(Message::Table, Message::ProfileId)
+                            .to(Profile::Table, Profile::Id)
                     )
                     .to_owned(),
             )
@@ -51,7 +51,7 @@ impl MigrationTrait for Migration {
 pub enum Message {
     Table,
     Id,
-    AuthorId,
+    ProfileId,
     ChatId,
     Content,
 }

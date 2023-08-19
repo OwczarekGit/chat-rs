@@ -1,0 +1,34 @@
+:host {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  justify-content: center;
+  align-items: center;
+  gap: .5em;
+  padding: .5em;
+  background-color: var(--color-2);
+  width: 100%;
+  height: 100%;
+}
+
+:host > * {
+  height: 40px;
+  min-width: 0;
+}
+
+input {
+  font-size: 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--color-3);
+  color: var(--color-text);
+  padding: .5em;
+}
+
+button {
+  font-size: 16px;
+  background-color: #3d98ff;
+}
+
+button:disabled {
+  filter: grayscale(90%);
+}

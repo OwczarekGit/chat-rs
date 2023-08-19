@@ -1,0 +1,7 @@
+<form (ngSubmit)="$event.preventDefault()" [formGroup]="form">
+  <h2>Create chat</h2>
+  <label class="form-field">
+    <input placeholder="Chat name" type="text" formControlName="name"/>
+  </label>
+  <button [disabled]="!form.valid" (click)="createChat()">Create</button>
+</form>
