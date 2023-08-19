@@ -71,6 +71,16 @@ impl AccountService {
         self.create_session(account.id).await
     }
 
+    pub async fn logout_user(&self, session_key: &str) {
+        if let Ok(Some(session)) = Session::find()
+            .filter(session::Column::Key.eq(session_key))
+            .one(&self.db)
+            .await {
+            
+            let _ = session.delete(&self.db).await;
+        }
+    }
+
     pub async fn authorize_from_session_cookie(&self, session_id: &str) -> Result<UserAccount, StatusCode> {
         let account = Session::find()
             .filter(session::Column::Key.eq(session_id))
@@ -105,7 +115,6 @@ impl AccountService {
         let cookie = Cookie::build("JSESSIONID", session.key)
             .http_only(true)
             .path("/")
-            .expires(None)
             .finish();
         
         Ok(jar.add(cookie))
