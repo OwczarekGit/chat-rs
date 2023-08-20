@@ -31,6 +31,7 @@
   position: absolute;
   right: 0;
   z-index: 99;
+  cursor: pointer;
 }
 
 .hidden {
@@ -53,16 +54,22 @@ ul {
   justify-content: center;
   flex-direction: column;
   gap: .5em;
+  max-height: 400px;
+  overflow: hidden auto;
 }
 
 li {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: var(--color-3);
+  background-color: #3d98ff;
   padding: .5em;
   border-radius: 8px;
   gap: .5em;
+}
+
+li:hover {
+  filter: brightness(120%);
 }
 
 img {

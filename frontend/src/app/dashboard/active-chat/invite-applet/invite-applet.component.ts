@@ -1,6 +1,7 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {SearchService} from "../../../service/search.service";
 import {ProfileSearchResult} from "../../../data/profile-search-result";
+import {ChatService} from "../../../service/chat.service";
 
 @Component({
   selector: 'app-invite-applet',
@@ -8,6 +9,9 @@ import {ProfileSearchResult} from "../../../data/profile-search-result";
   styleUrls: ['./invite-applet.component.css']
 })
 export class InviteAppletComponent {
+
+  @Input()
+  activeChatId!: number
 
   @ViewChild("applet")
   applet!: ElementRef<HTMLDivElement>
@@ -17,7 +21,7 @@ export class InviteAppletComponent {
 
   searchResults: ProfileSearchResult[] = []
 
-  constructor(private searchService: SearchService) {
+  constructor(private searchService: SearchService, private chatService: ChatService) {
   }
 
   toggle() {
@@ -33,5 +37,10 @@ export class InviteAppletComponent {
         this.searchResults = value;
       }
     })
+  }
+
+  inviteMember(r: ProfileSearchResult) {
+    this.applet.nativeElement.classList.add('hidden')
+    this.chatService.inviteToChat(this.activeChatId, r.id)
   }
 }

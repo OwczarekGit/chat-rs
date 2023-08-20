@@ -21,7 +21,14 @@ export class ChatService {
       })
   }
 
-  createChat(name: string) {
+  public inviteToChat(chatId: number, userId: number) {
+    this.http.post("/api/chat/invite", {
+      chat_id: chatId,
+      user_id: userId
+    }).subscribe()
+  }
+
+  public createChat(name: string) {
     this.http.post("/api/chat/create", {
       name: name
     }).subscribe({

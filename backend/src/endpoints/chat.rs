@@ -11,6 +11,7 @@ pub fn routes(state: ChatService) -> Router {
     Router::new()
         .route("/create", post(create_chat))
         .route("/list", get(get_all_chats))
+        .route("/invite", post(invite_to_chat))
         .with_state(state)
 }
 
@@ -27,6 +28,20 @@ pub async fn get_all_chats(
     State(service): State<ChatService>,
 ) -> Result<impl IntoResponse, StatusCode>{
     Ok(Json(service.get_chats_for_user(user.id).await?))
+}
+
+pub async fn invite_to_chat(
+    Extension(user): Extension<UserAccount>,
+    State(service): State<ChatService>,
+    Json(request): Json<InviteToChatRequest>,
+) -> impl IntoResponse {
+    service.invite_to_chat(user.id, request.user_id, request.chat_id).await
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct InviteToChatRequest {
+    pub chat_id: i64,
+    pub user_id: i64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

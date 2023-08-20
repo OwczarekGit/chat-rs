@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use futures::future::ok;
 use sea_orm::{ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 
@@ -57,6 +58,42 @@ impl ChatService {
                 .map(|c| UserChat::from(c.clone()))
                 .collect::<Vec<_>>()
         )
+    }
+
+    pub async fn invite_to_chat(&self, inviter_id: i64, user_id: i64, chat_id: i64) ->  Result<(), StatusCode> {
+        let cx = ChatXChatRoleXProfile::find()
+            .filter(chat_x_chat_role_x_profile::Column::ChatId.eq(chat_id))
+            .filter(chat_x_chat_role_x_profile::Column::ProfileId.eq(inviter_id))
+            .one(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .ok_or(StatusCode::BAD_REQUEST)?
+        ;
+
+        let already_member = ChatXChatRoleXProfile::find()
+            .filter(chat_x_chat_role_x_profile::Column::ChatId.eq(chat_id))
+            .filter(chat_x_chat_role_x_profile::Column::ProfileId.eq(user_id))
+            .one(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+        if already_member.is_some() {
+            return Err(StatusCode::BAD_REQUEST);
+        }
+
+        let cx = chat_x_chat_role_x_profile::ActiveModel {
+            chat_id: ActiveValue::Set(cx.chat_id),
+            profile_id: ActiveValue::Set(user_id),
+            chat_role_id: ActiveValue::Set(2),
+            ..Default::default()
+        };
+
+        ChatXChatRoleXProfile::insert(cx)
+            .exec(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+        Ok(())
     }
 
     pub async fn create_chat(&self, creator_id: i64, name: &str) -> Result<(), StatusCode> {

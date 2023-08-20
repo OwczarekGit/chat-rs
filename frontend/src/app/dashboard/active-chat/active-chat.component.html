@@ -3,7 +3,7 @@
   <div style="font-weight: bold;">
     {{activeChat?.name}}
   </div>
-  <app-invite-applet></app-invite-applet>
+  <app-invite-applet [activeChatId]="activeChatId"></app-invite-applet>
 </div>
 <div #message_box>
   <app-message-box [messages]="messages"></app-message-box>

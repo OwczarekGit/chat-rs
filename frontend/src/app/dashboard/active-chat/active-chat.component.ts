@@ -15,7 +15,7 @@ import {UtilService} from "../../service/util.service";
 })
 export class ActiveChatComponent implements OnInit, AfterViewInit {
 
-  private activeChatId!: number
+  activeChatId!: number
 
   public activeChat?: ChatEntry
 
@@ -65,7 +65,10 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
     let self = this;
     this.notificationService.notificationSubject.subscribe({
       next: msg => {
+
+        if (msg.chat_id == this.activeChatId)
           self.messages.push(msg)
+
       }
     })
   }
