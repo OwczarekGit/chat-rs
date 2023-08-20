@@ -19,6 +19,8 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
 
   public activeChat?: ChatEntry
 
+  public chatMembers: any
+
   @ViewChild("message_box")
   messageBox!: ElementRef<HTMLDivElement>
 
@@ -71,5 +73,13 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
 
       }
     })
+  }
+
+  changeChatName(prompt: HTMLInputElement) {
+    let text = prompt.value
+
+    if (text == "") return
+
+    this.chatService.changeChatName(this.activeChatId, text)
   }
 }

@@ -1,7 +1,7 @@
 <div class="chat-controls">
   <div class="back" (click)="backClicked()"></div>
-  <div style="font-weight: bold;">
-    {{activeChat?.name}}
+  <div class="chat-name">
+    <input #prompt type="text" [value]="activeChat?.name" (keyup.enter)="changeChatName(prompt)"/>
   </div>
   <app-invite-applet [activeChatId]="activeChatId"></app-invite-applet>
 </div>

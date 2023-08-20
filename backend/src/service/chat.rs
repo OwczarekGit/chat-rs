@@ -1,6 +1,5 @@
 use axum::http::StatusCode;
-use futures::future::ok;
-use sea_orm::{ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 
 use crate::entities::{prelude::*, *};
@@ -28,6 +27,45 @@ impl From<chat::Model> for UserChat {
 impl ChatService {
     pub fn new(db: DatabaseConnection) -> Self {
         Self{ db }
+    }
+
+    pub async fn change_chat_name(&self, user_id: i64, chat_id: i64, name: &str) -> Result<(), StatusCode> {
+        let cx = ChatXChatRoleXProfile::find()
+            .filter(chat_x_chat_role_x_profile::Column::ChatId.eq(chat_id))
+            .filter(chat_x_chat_role_x_profile::Column::ProfileId.eq(user_id))
+            .one(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .ok_or(StatusCode::BAD_REQUEST)?
+        ;
+
+        let user_role = ChatRole::find()
+            .filter(chat_role::Column::Id.eq(cx.chat_role_id))
+            .one(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .ok_or(StatusCode::BAD_REQUEST)?
+        ;
+
+        if !user_role.name.eq("Admin") {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+
+        let mut chat: chat::ActiveModel = Chat::find_by_id(chat_id)
+            .one(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .ok_or(StatusCode::BAD_REQUEST)?
+            .into()
+        ;
+
+        chat.name = ActiveValue::Set(name.to_string());
+        let _ = chat.update(&self.db)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        ;
+
+        Ok(())
     }
 
     pub async fn get_chats_for_user(&self, user_id: i64) -> Result<Vec<UserChat>, StatusCode> {

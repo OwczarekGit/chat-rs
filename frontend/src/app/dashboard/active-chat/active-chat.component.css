@@ -50,6 +50,23 @@
   transform: rotateZ(-45deg);
 }
 
+.chat-name {
+
+}
+
+.chat-name input {
+  background-color: transparent;
+  color: var(--color-text);
+  font-weight: bold;
+  border: none;
+  font-size: 16px;
+  min-width: 0;
+}
+
+.chat-name input:focus-within {
+  background-color: var(--color-2);
+}
+
 @media screen and (min-width: 700px) {
   .back {
     display: none;

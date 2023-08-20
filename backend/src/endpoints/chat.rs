@@ -1,8 +1,8 @@
 use axum::response::IntoResponse;
 use axum::{Extension, Json, Router};
-use axum::extract::State;
-use axum::routing::{get, post};
-use hyper::StatusCode;
+use axum::extract::{Path, State};
+use axum::http::StatusCode;
+use axum::routing::{get, post, put};
 use serde::{Deserialize, Serialize};
 use crate::endpoints::account::UserAccount;
 use crate::service::chat::ChatService;
@@ -12,7 +12,17 @@ pub fn routes(state: ChatService) -> Router {
         .route("/create", post(create_chat))
         .route("/list", get(get_all_chats))
         .route("/invite", post(invite_to_chat))
+        .route("/:id/name", put(change_chat_name))
         .with_state(state)
+}
+
+pub async fn change_chat_name(
+    Extension(user): Extension<UserAccount>,
+    State(service): State<ChatService>,
+    Path(chat_id): Path<i64>,
+    Json(request): Json<ChangeChatNameRequest>,
+) -> Result<impl IntoResponse, StatusCode> {
+    service.change_chat_name(user.id, chat_id, &request.name).await
 }
 
 pub async fn create_chat(
@@ -46,5 +56,10 @@ pub struct InviteToChatRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateChatRequest {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ChangeChatNameRequest {
     pub name: String,
 }

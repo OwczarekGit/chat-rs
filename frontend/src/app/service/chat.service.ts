@@ -21,6 +21,14 @@ export class ChatService {
       })
   }
 
+  public changeChatName(chatId: number, name: string) {
+    this.http.put(`/api/chat/${chatId}/name`, {
+      name: name
+    }).subscribe({
+      next: value => this.updateChatList()
+    })
+  }
+
   public inviteToChat(chatId: number, userId: number) {
     this.http.post("/api/chat/invite", {
       chat_id: chatId,
