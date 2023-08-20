@@ -4,16 +4,22 @@
   justify-content: flex-start;
 }
 
-div {
+.message {
   border-radius: 1em;
   padding: 1em;
   font-size: 18px;
   margin: 0;
-  background-color: var(--color-2)
+  background-color: var(--color-2);
+  max-width: min(90%, 400px);
 }
 
 .my-message {
   background-color: #3d98ff;
   margin-left: auto;
 
+}
+
+
+.message:hover {
+  filter: brightness(110%);
 }

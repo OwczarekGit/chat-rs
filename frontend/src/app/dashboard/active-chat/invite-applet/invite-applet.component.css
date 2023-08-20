@@ -28,7 +28,8 @@
   padding: 1em;
   background-color: var(--color-2);
   border-radius: 8px;
-  position: fixed;
+  position: absolute;
+  right: 0;
   z-index: 99;
 }
 

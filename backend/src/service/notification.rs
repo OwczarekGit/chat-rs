@@ -28,7 +28,6 @@ impl NotificationService {
     }
 
     pub async fn send_notification(&mut self, user_id: i64, message: &str) {
-        dbg!(&self.notification_channels);
         if let Some(channel) = self.notification_channels.get_mut(&user_id) {
             let _ = channel.send(Event::default().data(message).try_into()).await;
         }

@@ -20,4 +20,14 @@ export class ChatService {
         next: value => this.chatList = value
       })
   }
+
+  createChat(name: string) {
+    this.http.post("/api/chat/create", {
+      name: name
+    }).subscribe({
+      next: value => {
+        this.updateChatList()
+      }
+    })
+  }
 }

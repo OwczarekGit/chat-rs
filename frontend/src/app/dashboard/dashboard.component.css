@@ -11,9 +11,12 @@
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 0;
+
+  transition: grid-template-columns 0.1s ease-in-out 0s;
 }
 
 .content > div {
   min-height: 0;
   overflow: hidden auto;
 }
+

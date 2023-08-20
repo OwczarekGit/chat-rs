@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {ChatService} from "../../service/chat.service";
 import {HttpClient} from "@angular/common/http";
@@ -6,6 +6,7 @@ import {MessageService} from "../../service/message.service";
 import {ChatMessage} from "../../data/chat-message";
 import {NotificationService} from "../../service/notification.service";
 import {ChatEntry} from "../../data/chat-entry";
+import {UtilService} from "../../service/util.service";
 
 @Component({
   selector: 'app-active-chat',
@@ -14,7 +15,9 @@ import {ChatEntry} from "../../data/chat-entry";
 })
 export class ActiveChatComponent implements OnInit, AfterViewInit {
 
-  private activeChatId!: number;
+  private activeChatId!: number
+
+  public activeChat?: ChatEntry
 
   @ViewChild("message_box")
   messageBox!: ElementRef<HTMLDivElement>
@@ -24,9 +27,9 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private chatService: ChatService,
-    private http: HttpClient,
     private messageService: MessageService,
     private notificationService: NotificationService,
+    private utilService: UtilService,
   ) {
   }
 
@@ -39,14 +42,19 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
           .subscribe({
             next: msg => {
               this.messages = msg
+
+              let index = this.chatService.chatList.findIndex((c) => c.id == this.activeChatId)
+              if (index != -1)
+                this.activeChat = this.chatService.chatList[index]
             }
           })
+
       }
     })
   }
 
-  public track(index: number, msg: ChatMessage): number {
-    return msg.id
+  public backClicked() {
+    this.utilService.backButtonClicked.next(0)
   }
 
   sendMessage(message: string) {

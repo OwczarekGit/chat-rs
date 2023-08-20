@@ -9,7 +9,12 @@ import {NotificationService} from "../../../service/notification.service";
 })
 export class MessageBoxComponent {
   @Input()
-  messages: ChatMessage[] = []
+  set messages(messages: ChatMessage[]) {
+    this._messages = messages
+    this.scrollToBottom()
+  }
+
+  _messages: ChatMessage[] = []
 
   constructor(
     private host: ElementRef<HTMLDivElement>,

@@ -1,11 +1,11 @@
 <div class="bar">
   <app-bar></app-bar>
 </div>
-<div class="content">
-  <div>
-    <app-chat-list></app-chat-list>
+<div #content class="content">
+  <div class="panel">
+    <app-chat-list (chatClicked)="focusChat()"></app-chat-list>
   </div>
-  <div>
+  <div class="main">
     <router-outlet></router-outlet>
   </div>
 </div>
