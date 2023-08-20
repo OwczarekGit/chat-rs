@@ -37,9 +37,9 @@ export class LoginService {
   }
 
   public logout() {
+    this.cookies.delete("AUTH")
     return this.http.delete("/api/account/logout").subscribe({
       next: value => {
-        this.cookies.delete("AUTH")
         // this.router.navigate(["/"])
       }
     })
