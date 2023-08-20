@@ -14,6 +14,9 @@ import { BarComponent } from './dashboard/bar/bar.component';
 import { CreateChatComponent } from './dashboard/create-chat/create-chat.component';
 import { ActiveChatComponent } from './dashboard/active-chat/active-chat.component';
 import { MessagePromptComponent } from './dashboard/active-chat/message-prompt/message-prompt.component';
+import { MessageBoxComponent } from './dashboard/active-chat/message-box/message-box.component';
+import { SingleMessageComponent } from './dashboard/active-chat/message-box/single-message/single-message.component';
+import { InviteAppletComponent } from './dashboard/active-chat/invite-applet/invite-applet.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +29,10 @@ import { MessagePromptComponent } from './dashboard/active-chat/message-prompt/m
     BarComponent,
     CreateChatComponent,
     ActiveChatComponent,
-    MessagePromptComponent
+    MessagePromptComponent,
+    MessageBoxComponent,
+    SingleMessageComponent,
+    InviteAppletComponent
   ],
   imports: [
     BrowserModule,

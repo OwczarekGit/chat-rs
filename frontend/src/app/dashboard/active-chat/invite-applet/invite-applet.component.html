@@ -1,0 +1,14 @@
+<button class="invite-button" (click)="toggle()"></button>
+<div #applet class="applet hidden">
+  <input #search_field placeholder="Search users" type="text" (keyup)="performSearch()"/>
+  <ul>
+    <li *ngFor="let r of searchResults">
+      <div>
+        <img class="profile-img" alt="profile-picture" src="https://i.pravatar.cc/24/{{r.id}}"/>
+      </div>
+      <div>
+        {{r.username}}
+      </div>
+    </li>
+  </ul>
+</div>

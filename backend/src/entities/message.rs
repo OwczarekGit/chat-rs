@@ -11,6 +11,7 @@ pub struct Model {
     pub content: String,
     pub chat_id: i64,
     pub profile_id: i64,
+    pub created: DateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

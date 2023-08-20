@@ -1,5 +1,8 @@
-<div>
-  messages
+<div class="chat-controls">
+  <app-invite-applet></app-invite-applet>
+</div>
+<div #message_box>
+  <app-message-box [messages]="messages"></app-message-box>
 </div>
 <div>
   <app-message-prompt (messageSend)="sendMessage($event)"></app-message-prompt>

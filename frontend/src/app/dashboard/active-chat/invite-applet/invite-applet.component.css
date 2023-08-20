@@ -1,0 +1,71 @@
+.invite-button {
+  padding: 0;
+  margin: 0;
+  width: 32px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.invite-button::before, .invite-button::after {
+  content: '';
+  display: block;
+  background-color: var(--color-text);
+  width: 24px;
+  height: 4px;
+  position: absolute;
+}
+
+.invite-button::after {
+  transform: rotateZ(90deg);
+}
+
+.applet {
+  padding: 1em;
+  background-color: var(--color-2);
+  border-radius: 8px;
+  position: fixed;
+  z-index: 99;
+}
+
+.hidden {
+  display: none;
+}
+
+input {
+  font-size: 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--color-3);
+  color: var(--color-text);
+  padding: .5em;
+}
+
+ul {
+  width: 100%;
+  margin-top: 1em;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: .5em;
+}
+
+li {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--color-3);
+  padding: .5em;
+  border-radius: 8px;
+  gap: .5em;
+}
+
+img {
+  width: 24px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+}

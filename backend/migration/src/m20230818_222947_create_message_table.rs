@@ -34,6 +34,7 @@ impl MigrationTrait for Migration {
                             .from(Message::Table, Message::ProfileId)
                             .to(Profile::Table, Profile::Id)
                     )
+                    .col(ColumnDef::new(Message::Created).timestamp().not_null())
                     .to_owned(),
             )
             .await
@@ -54,4 +55,5 @@ pub enum Message {
     ProfileId,
     ChatId,
     Content,
+    Created,
 }

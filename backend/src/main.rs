@@ -2,12 +2,10 @@ use std::env;
 use std::sync::Arc;
 use axum::extract::State;
 use axum::response::IntoResponse;
-use axum::{Router, Extension, Json};
+use axum::{Router};
 use axum::middleware::Next;
-use axum::routing::get;
 use axum_extra::extract::CookieJar;
 use dotenvy::dotenv;
-use endpoints::account::UserAccount;
 use hyper::{StatusCode, Request};
 use sea_orm::{DatabaseConnection, Database };
 use tokio::sync::Mutex;
@@ -16,6 +14,7 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::service::chat::ChatService;
 use crate::service::message::MessageService;
 use crate::service::notification::NotificationService;
+use crate::service::search::SearchService;
 
 mod entities;
 mod service;
@@ -41,7 +40,8 @@ async fn main() {
     let account_service = AccountService::new(connection.clone());
     let chat_service = ChatService::new(connection.clone());
     let message_service = MessageService::new(connection.clone());
-    let notification_service = Arc::new(Mutex::new(NotificationService::new()));
+    let notification_service = Arc::new(Mutex::new(NotificationService::new(connection.clone())));
+    let search_service = SearchService::new(connection.clone());
 
     let message_app_state = MessageAppState {
         message_service: message_service.clone(),
@@ -53,7 +53,8 @@ async fn main() {
         .allow_origin(Any);
 
     let app = Router::new()
-        .route("/api/me", get(print_user))
+        .nest("/api/profile", endpoints::profile::routes())
+        .nest("/api/search", endpoints::search::routes(search_service.clone()))
         .nest("/api/chat", endpoints::chat::routes(chat_service.clone()))
         .nest("/api/message", endpoints::message::routes(message_app_state))
         .nest("/api/notification", endpoints::notification::routes(notification_service.clone()))
@@ -66,12 +67,6 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn print_user(
-    Extension(user): Extension<UserAccount>,
-) -> impl IntoResponse {
-    Json(user)
 }
 
 async fn authorize_from_session_cookie<B>(

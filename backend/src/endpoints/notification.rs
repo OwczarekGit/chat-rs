@@ -20,7 +20,7 @@ pub async fn subscribe_to_notifications(
     State(notification_service): State<Arc<Mutex<NotificationService>>>,
     Extension(user): Extension<UserAccount>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let stream = notification_service.lock().await.subscribe_to_notifications(1).await;
+    let stream = notification_service.lock().await.subscribe_to_notifications(user.id).await;
 
     Sse::new(stream)
         .keep_alive(

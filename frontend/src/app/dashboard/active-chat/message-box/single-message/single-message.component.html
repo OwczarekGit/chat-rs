@@ -1,0 +1,6 @@
+<div *ngIf="message.author_id == profileService.currentUser?.id" class="my-message">
+  {{message.message}}
+</div>
+<div *ngIf="message.author_id != profileService.currentUser?.id">
+  {{message.message}}
+</div>

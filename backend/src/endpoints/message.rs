@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use axum::{Extension, Json, Router};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
@@ -25,15 +26,29 @@ pub async fn send_message(
 ) -> Result<impl IntoResponse, StatusCode> {
     let message = ChatMessage::from(state.message_service.send_message(chat_id, user_account.id, &request.message).await?);
     let json = serde_json::to_string(&message).expect("");
-    state.notification_service.lock().await.send_notification(1, &json).await;
+    let _ = state.notification_service.lock().await.notify_all_chat_members(chat_id, &json).await;
     Ok(())
 }
 
 pub async fn get_all_for_chat(
-    State(_state): State<MessageAppState>,
-    Path(_chat_id): Path<i64>,
-) -> impl IntoResponse {
+    State(state): State<MessageAppState>,
+    Path(chat_id): Path<i64>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let mut items = state.message_service.get_all_for_chat(chat_id)
+        .await?
+        .into_iter()
+        .map(|e| ChatMessage::from(e))
+        .collect::<Vec<_>>();
 
+    items
+        .sort_by(|a,b| {
+            if a.created >= b.created {
+                Ordering::Greater
+            } else {
+                Ordering::Less
+            }
+        });
+    Ok(Json(items))
 }
 
 #[derive(Serialize, Deserialize, Debug)]

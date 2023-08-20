@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use chrono::{NaiveDateTime, Utc};
 use sea_orm::{ActiveValue, DatabaseConnection, EntityTrait, ModelTrait};
 use serde::{Deserialize, Serialize};
 use crate::entities::{prelude::*, *};
@@ -11,19 +12,23 @@ pub struct MessageService {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ChatMessage {
-    id: i64,
-    message: String,
-    author_id: i64,
-    author_name: String,
+    pub id: i64,
+    pub message: String,
+    pub author_id: i64,
+    pub author_name: String,
+    pub chat_id: i64,
+    pub created: NaiveDateTime
 }
 
-impl From<(message::Model, profile::Model)> for ChatMessage {
-    fn from(value: (Model, profile::Model)) -> Self {
+impl From<(message::Model, profile::Model, chat::Model)> for ChatMessage {
+    fn from(value: (Model, profile::Model, chat::Model)) -> Self {
         Self {
             id: value.0.id,
             message: value.0.content,
             author_id: value.1.id,
-            author_name: value.1.username
+            author_name: value.1.username,
+            chat_id: value.2.id,
+            created: value.0.created,
         }
     }
 }
@@ -33,7 +38,8 @@ impl MessageService {
         Self { db }
     }
 
-    pub async fn send_message(&self, chat_id: i64, author_id: i64, message: &str) -> Result<(message::Model, profile::Model), StatusCode> {
+    pub async fn send_message(&self, chat_id: i64, author_id: i64, message: &str)
+        -> Result<(message::Model, profile::Model, chat::Model), StatusCode> {
         let chat = Chat::find_by_id(chat_id)
             .one(&self.db)
             .await
@@ -52,6 +58,7 @@ impl MessageService {
             chat_id: ActiveValue::Set(chat.id),
             profile_id: ActiveValue::Set(author.id),
             content: ActiveValue::Set(message.to_string()),
+            created: ActiveValue::Set(Utc::now().naive_utc()),
             ..Default::default()
         };
 
@@ -61,10 +68,10 @@ impl MessageService {
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         ;
 
-        Ok((msg, author))
+        Ok((msg, author, chat))
     }
 
-    pub async fn get_all_for_chat(&self, chat_id: i64) -> Result<Vec<(message::Model, profile::Model)>, StatusCode> {
+    pub async fn get_all_for_chat(&self, chat_id: i64) -> Result<Vec<(message::Model, profile::Model, chat::Model)>, StatusCode> {
         let chat = Chat::find_by_id(chat_id)
             .one(&self.db)
             .await
@@ -87,7 +94,7 @@ impl MessageService {
                 .ok_or(StatusCode::NOT_FOUND)?
             ;
 
-            results.push((message, author));
+            results.push((message, author, chat.clone()));
         }
 
         Ok(results)

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, OnChanges, SimpleChanges} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {ChatMessage} from "../data/chat-message";
 
@@ -12,12 +12,14 @@ export class MessageService {
   public sendMessage(chatId: number, message: string) {
     this.http.post(`/api/message/${chatId}`, {
       message: message
-    }).subscribe({
-      next: value => console.log(value)
-    })
+    }).subscribe()
   }
 
   public getAllMessages(chatId: number) {
-    return this.http.get<ChatMessage[]>("/api/message/")
+    return this.http.get<ChatMessage[]>(`/api/message/${chatId}/all`)
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes)
   }
 }

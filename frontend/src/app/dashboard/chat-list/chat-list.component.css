@@ -1,9 +1,15 @@
 :host {
   display: grid;
-  grid-template-rows: auto 64px;
+  grid-template-rows: 1fr 64px;
+  background-color: var(--color-1);
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-list {
+  overflow: hidden auto;
   height: 100%;
   width: 100%;
-  background-color: var(--color-1);
 }
 
 button {
