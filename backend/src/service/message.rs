@@ -11,7 +11,7 @@ pub struct MessageService {
     db: DatabaseConnection
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ChatMessage {
     pub id: i64,
     pub message: String,

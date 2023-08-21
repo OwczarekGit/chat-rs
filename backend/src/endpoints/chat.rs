@@ -6,7 +6,9 @@ use axum::routing::{get, post, put};
 use serde::{Deserialize, Serialize};
 use crate::AppState;
 use crate::endpoints::account::UserAccount;
+use crate::endpoints::notification::{AppNotification, AppNotificationType};
 use crate::service::chat::ChatService;
+use crate::service::notification::NotificationService;
 
 pub fn routes(state: AppState) -> Router {
     Router::new()
@@ -43,10 +45,22 @@ pub async fn get_all_chats(
 
 pub async fn invite_to_chat(
     Extension(user): Extension<UserAccount>,
-    State(service): State<ChatService>,
+    State(chat_service): State<ChatService>,
+    State(mut notification_service): State<NotificationService>,
     Json(request): Json<InviteToChatRequest>,
-) -> impl IntoResponse {
-    service.invite_to_chat(user.id, request.user_id, request.chat_id).await
+) -> Result<impl IntoResponse, StatusCode> {
+    chat_service.invite_to_chat(user.id, request.user_id, request.chat_id).await?;
+
+    let message = AppNotification {
+        notification_type: AppNotificationType::ChatInvitation,
+        body: {}
+    };
+
+    let message = serde_json::to_string(&message).expect("");
+
+    notification_service.send_notification(request.user_id, &message).await;
+
+    Ok(())
 }
 
 #[derive(Serialize, Deserialize, Debug)]

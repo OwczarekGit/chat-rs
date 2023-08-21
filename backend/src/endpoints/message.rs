@@ -7,6 +7,7 @@ use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 use crate::endpoints::account::UserAccount;
 use crate::AppState;
+use crate::endpoints::notification::{AppNotification, AppNotificationType};
 use crate::service::message::{ChatMessage, MessageService};
 use crate::service::notification::NotificationService;
 
@@ -25,7 +26,12 @@ pub async fn send_message(
     Json(request): Json<SendMessageRequest>
 ) -> Result<impl IntoResponse, StatusCode> {
     let message = ChatMessage::from(message_service.send_message(chat_id, user_account.id, &request.message).await?);
-    let json = serde_json::to_string(&message).expect("");
+    let notification = AppNotification {
+        notification_type: AppNotificationType::ChatMessage,
+        body: message
+    };
+
+    let json = serde_json::to_string(&notification).expect("");
     let _ = notification_service.notify_all_chat_members(chat_id, &json).await;
     Ok(())
 }

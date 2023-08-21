@@ -20,7 +20,7 @@ export class MessageBoxComponent {
     private host: ElementRef<HTMLDivElement>,
     private notificationService: NotificationService,
   ) {
-    this.notificationService.notificationSubject.subscribe({
+    this.notificationService.chatMessageSubject.subscribe({
       next: v => {
         this.scrollToBottom()
       }

@@ -1,8 +1,10 @@
 use axum::{Extension, response::sse::{Event, Sse}, Router};
 use futures::stream::{Stream};
 use std::{convert::Infallible, time::Duration};
+use std::fmt::Debug;
 use axum::extract::State;
 use axum::routing::get;
+use serde::{Deserialize, Serialize};
 use crate::AppState;
 use crate::endpoints::account::UserAccount;
 use crate::service::notification::NotificationService;
@@ -25,4 +27,17 @@ pub async fn subscribe_to_notifications(
                 .interval(Duration::from_secs(1))
                 .text("keep-alive")
         )
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct AppNotification<T: Serialize + Debug + Clone> {
+    pub notification_type: AppNotificationType,
+    pub body: T
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AppNotificationType {
+    ChatMessage,
+    ChatInvitation,
 }

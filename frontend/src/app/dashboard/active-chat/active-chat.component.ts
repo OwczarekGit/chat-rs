@@ -65,7 +65,7 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     let self = this;
-    this.notificationService.notificationSubject.subscribe({
+    this.notificationService.chatMessageSubject.subscribe({
       next: msg => {
 
         if (msg.chat_id == this.activeChatId)
