@@ -6,13 +6,13 @@ use axum::response::sse::Event;
 use axum_macros::FromRef;
 use futures::{SinkExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-use tokio::sync::Mutex;
+use tokio::sync::{RwLock};
 use crate::entities::{*, prelude::*};
 
 #[derive(Clone, FromRef)]
 pub struct NotificationService {
     db: DatabaseConnection,
-    notification_channels: Arc<Mutex<HashMap<i64, futures::channel::mpsc::UnboundedSender<Result<Event, Infallible>>>>>,
+    notification_channels: Arc<RwLock<HashMap<i64, futures::channel::mpsc::UnboundedSender<Result<Event, Infallible>>>>>,
 }
 
 impl NotificationService {
@@ -25,13 +25,13 @@ impl NotificationService {
 
     pub async fn subscribe_to_notifications(&mut self, user_id: i64) -> futures::channel::mpsc::UnboundedReceiver<Result<Event, Infallible>> {
         let (tx,rx) = futures::channel::mpsc::unbounded::<Result<Event, Infallible>>();
-        let _ = self.notification_channels.lock().await.insert(user_id, tx);
+        let _ = self.notification_channels.write().await.insert(user_id, tx);
 
         rx
     }
 
     pub async fn send_notification(&mut self, user_id: i64, message: &str) {
-        if let Some(channel) = self.notification_channels.lock().await.get_mut(&user_id) {
+        if let Some(channel) = self.notification_channels.write().await.get_mut(&user_id) {
             let _ = channel.send(Event::default().data(message).try_into()).await;
         }
     }
