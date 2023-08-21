@@ -2,6 +2,8 @@
   display: flex;
   width: 100%;
   justify-content: flex-start;
+  flex-direction: column;
+  gap: .5em;
 }
 
 .message {
@@ -10,6 +12,8 @@
   font-size: 18px;
   margin: 0;
   background-color: var(--color-2);
+  min-width: 0;
+  width: fit-content;
   max-width: min(90%, 400px);
 }
 
@@ -21,4 +25,23 @@
 
 .message:hover {
   filter: brightness(110%);
+}
+
+.author {
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .5em;
+  align-self: flex-start;
+}
+
+.author img {
+  width: 16px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.hidden {
+  display: none;
 }

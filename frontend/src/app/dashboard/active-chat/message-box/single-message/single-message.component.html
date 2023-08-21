@@ -1,3 +1,7 @@
 <div class="message" [ngClass]="{'my-message': profileService.currentUser?.id == message.author_id}">
   {{message.message}}
 </div>
+<div class="author" [ngClass]="{'hidden': profileService.currentUser?.id == message.author_id}">
+  <img alt="profile-pic" src="https://i.pravatar.cc/64/{{message.id}}"/>
+  {{message.author_name}}
+</div>
