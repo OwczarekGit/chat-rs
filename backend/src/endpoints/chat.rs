@@ -4,10 +4,11 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post, put};
 use serde::{Deserialize, Serialize};
+use crate::AppState;
 use crate::endpoints::account::UserAccount;
 use crate::service::chat::ChatService;
 
-pub fn routes(state: ChatService) -> Router {
+pub fn routes(state: AppState) -> Router {
     Router::new()
         .route("/create", post(create_chat))
         .route("/list", get(get_all_chats))

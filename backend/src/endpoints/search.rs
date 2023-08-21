@@ -3,10 +3,11 @@ use axum::{Extension, Json, Router};
 use axum::extract::{Path, State};
 use axum::routing::get;
 use hyper::StatusCode;
+use crate::AppState;
 use crate::endpoints::account::UserAccount;
 use crate::service::search::SearchService;
 
-pub fn routes(service: SearchService) -> Router {
+pub fn routes(service: AppState) -> Router {
     Router::new()
         .route("/profile/:search_string", get(search_users))
         .with_state(service)

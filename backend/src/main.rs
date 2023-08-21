@@ -1,14 +1,13 @@
 use std::env;
-use std::sync::Arc;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Router};
 use axum::middleware::Next;
 use axum_extra::extract::CookieJar;
+use axum_macros::FromRef;
 use dotenvy::dotenv;
 use hyper::{StatusCode, Request};
 use sea_orm::{DatabaseConnection, Database };
-use tokio::sync::Mutex;
 use service::account::AccountService;
 use tower_http::cors::{Any, CorsLayer};
 use crate::service::chat::ChatService;
@@ -27,25 +26,25 @@ pub async fn establish_connection() -> DatabaseConnection {
     connection.clone()
 }
 
-#[derive(Clone)]
-pub struct MessageAppState {
-    pub message_service: MessageService,
-    pub notification_service: Arc<Mutex<NotificationService>>,
+#[derive(Clone, FromRef)]
+pub struct AppState {
+    account_service: AccountService,
+    chat_service: ChatService,
+    message_service: MessageService,
+    search_service:  SearchService,
+    notification_service: NotificationService,
 }
 
 #[tokio::main]
 async fn main() {
     let connection = establish_connection().await;
 
-    let account_service = AccountService::new(connection.clone());
-    let chat_service = ChatService::new(connection.clone());
-    let message_service = MessageService::new(connection.clone());
-    let notification_service = Arc::new(Mutex::new(NotificationService::new(connection.clone())));
-    let search_service = SearchService::new(connection.clone());
-
-    let message_app_state = MessageAppState {
-        message_service: message_service.clone(),
-        notification_service: notification_service.clone()
+    let app_state = AppState {
+        account_service: AccountService::new(connection.clone()),
+        chat_service: ChatService::new(connection.clone()),
+        message_service: MessageService::new(connection.clone()),
+        notification_service: NotificationService::new(connection.clone()),
+        search_service: SearchService::new(connection.clone()),
     };
 
     let cors = CorsLayer::new()
@@ -54,12 +53,12 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api/profile", endpoints::profile::routes())
-        .nest("/api/search", endpoints::search::routes(search_service.clone()))
-        .nest("/api/chat", endpoints::chat::routes(chat_service.clone()))
-        .nest("/api/message", endpoints::message::routes(message_app_state))
-        .nest("/api/notification", endpoints::notification::routes(notification_service.clone()))
-        .layer(axum::middleware::from_fn_with_state(account_service.clone(), authorize_from_session_cookie))
-        .nest("/api/account", endpoints::account::routes(account_service.clone()))
+        .nest("/api/search", endpoints::search::routes(app_state.clone()))
+        .nest("/api/chat", endpoints::chat::routes(app_state.clone()))
+        .nest("/api/message", endpoints::message::routes(app_state.clone()))
+        .nest("/api/notification", endpoints::notification::routes(app_state.clone()))
+        .layer(axum::middleware::from_fn_with_state(app_state.account_service.clone(), authorize_from_session_cookie))
+        .nest("/api/account", endpoints::account::routes(app_state.clone()))
         .layer(cors)
         ;
 

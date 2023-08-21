@@ -1,10 +1,10 @@
 use axum::{Router, Json, extract::State, response::IntoResponse, routing::{post, delete}};
 use chrono::NaiveDateTime;
 use serde::{Serialize, Deserialize};
-use crate::{entities::account, service::account::AccountService};
+use crate::{AppState, entities::account, service::account::AccountService};
 use axum_extra::extract::{CookieJar, cookie::Cookie};
 
-pub fn routes(state: AccountService) -> Router {
+pub fn routes(state: AppState) -> Router {
     Router::new()
         .route("/register", post(register))
         .route("/login", post(login))

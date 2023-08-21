@@ -1,8 +1,9 @@
 use axum::http::StatusCode;
+use axum_macros::FromRef;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::{entities::{*, prelude::*}};
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct SearchService {
     db: DatabaseConnection
 }

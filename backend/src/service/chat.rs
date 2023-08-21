@@ -1,10 +1,11 @@
 use axum::http::StatusCode;
+use axum_macros::FromRef;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 
 use crate::entities::{prelude::*, *};
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct ChatService {
     db: DatabaseConnection,
 }

@@ -1,11 +1,12 @@
 use axum::response::IntoResponse;
 use axum_extra::extract::{CookieJar, cookie::Cookie};
+use axum_macros::FromRef;
 use chrono::Utc;
 use hyper::StatusCode;
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, ColumnTrait, ActiveValue, ModelTrait};
 use crate::{entities::{*, prelude::*}, endpoints::account::UserAccount};
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct AccountService {
     db: DatabaseConnection,
 }

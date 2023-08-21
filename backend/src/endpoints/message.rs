@@ -6,12 +6,11 @@ use axum::routing::{get, post};
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 use crate::endpoints::account::UserAccount;
-use crate::MessageAppState;
-use crate::service::message::ChatMessage;
+use crate::AppState;
+use crate::service::message::{ChatMessage, MessageService};
+use crate::service::notification::NotificationService;
 
-pub fn routes(
-    state: MessageAppState
-) -> Router {
+pub fn routes(state: AppState) -> Router {
     Router::new()
         .route("/:id", post(send_message))
         .route("/:id/all", get(get_all_for_chat))
@@ -19,22 +18,23 @@ pub fn routes(
 }
 
 pub async fn send_message(
-    State(state): State<MessageAppState>,
+    State(message_service): State<MessageService>,
+    State(mut notification_service): State<NotificationService>,
     Extension(user_account): Extension<UserAccount>,
     Path(chat_id): Path<i64>,
     Json(request): Json<SendMessageRequest>
 ) -> Result<impl IntoResponse, StatusCode> {
-    let message = ChatMessage::from(state.message_service.send_message(chat_id, user_account.id, &request.message).await?);
+    let message = ChatMessage::from(message_service.send_message(chat_id, user_account.id, &request.message).await?);
     let json = serde_json::to_string(&message).expect("");
-    let _ = state.notification_service.lock().await.notify_all_chat_members(chat_id, &json).await;
+    let _ = notification_service.notify_all_chat_members(chat_id, &json).await;
     Ok(())
 }
 
 pub async fn get_all_for_chat(
-    State(state): State<MessageAppState>,
+    State(message_service): State<MessageService>,
     Path(chat_id): Path<i64>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let mut items = state.message_service.get_all_for_chat(chat_id)
+    let mut items = message_service.get_all_for_chat(chat_id)
         .await?
         .into_iter()
         .map(|e| ChatMessage::from(e))

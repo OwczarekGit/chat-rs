@@ -1,11 +1,12 @@
 use axum::http::StatusCode;
+use axum_macros::FromRef;
 use chrono::{NaiveDateTime, Utc};
 use sea_orm::{ActiveValue, DatabaseConnection, EntityTrait, ModelTrait};
 use serde::{Deserialize, Serialize};
 use crate::entities::{prelude::*, *};
 use crate::entities::message::Model;
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct MessageService {
     db: DatabaseConnection
 }
