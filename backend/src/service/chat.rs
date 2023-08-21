@@ -4,6 +4,7 @@ use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, En
 use serde::{Deserialize, Serialize};
 
 use crate::entities::{prelude::*, *};
+use crate::entities::sea_orm_active_enums::ChatRole;
 
 #[derive(Clone, FromRef)]
 pub struct ChatService {
@@ -31,26 +32,15 @@ impl ChatService {
     }
 
     pub async fn change_chat_name(&self, user_id: i64, chat_id: i64, name: &str) -> Result<(), StatusCode> {
-        let cx = ChatXChatRoleXProfile::find()
+        let _ = ChatXChatRoleXProfile::find()
             .filter(chat_x_chat_role_x_profile::Column::ChatId.eq(chat_id))
             .filter(chat_x_chat_role_x_profile::Column::ProfileId.eq(user_id))
+            .filter(chat_x_chat_role_x_profile::Column::ChatRole.eq("Admin"))
             .one(&self.db)
             .await
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
             .ok_or(StatusCode::BAD_REQUEST)?
         ;
-
-        let user_role = ChatRole::find()
-            .filter(chat_role::Column::Id.eq(cx.chat_role_id))
-            .one(&self.db)
-            .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-            .ok_or(StatusCode::BAD_REQUEST)?
-        ;
-
-        if !user_role.name.eq("Admin") {
-            return Err(StatusCode::UNAUTHORIZED);
-        }
 
         let mut chat: chat::ActiveModel = Chat::find_by_id(chat_id)
             .one(&self.db)
@@ -123,7 +113,7 @@ impl ChatService {
         let cx = chat_x_chat_role_x_profile::ActiveModel {
             chat_id: ActiveValue::Set(cx.chat_id),
             profile_id: ActiveValue::Set(user_id),
-            chat_role_id: ActiveValue::Set(2),
+            chat_role: ActiveValue::Set(ChatRole::Member),
             ..Default::default()
         };
 
@@ -137,14 +127,6 @@ impl ChatService {
 
     pub async fn create_chat(&self, creator_id: i64, name: &str) -> Result<(), StatusCode> {
         let creator = Profile::find_by_id(creator_id)
-            .one(&self.db)
-            .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-            .ok_or(StatusCode::NOT_FOUND)?
-            ;
-
-        let role = ChatRole::find()
-            .filter(chat_role::Column::Name.eq("Admin"))
             .one(&self.db)
             .await
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -165,7 +147,7 @@ impl ChatService {
 
         let chat_x_model = chat_x_chat_role_x_profile::ActiveModel {
             chat_id: ActiveValue::Set(chat_id),
-            chat_role_id: ActiveValue::Set(role.id),
+            chat_role: ActiveValue::Set(ChatRole::Admin),
             profile_id: ActiveValue::Set(creator.id),
             ..Default::default()
         };

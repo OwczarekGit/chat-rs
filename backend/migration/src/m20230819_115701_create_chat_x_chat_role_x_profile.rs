@@ -1,7 +1,8 @@
 use sea_orm_migration::prelude::*;
+use sea_orm_migration::prelude::extension::postgres::Type;
+use crate::sea_orm::{EnumIter, Iterable};
 
 use super::m20230819_115126_create_profile_table::Profile;
-use super::m20230819_115446_create_chat_role_table::ChatRole;
 use super::m20230818_222729_create_chat_table::Chat;
 
 #[derive(DeriveMigrationName)]
@@ -11,6 +12,14 @@ pub struct Migration;
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Replace the sample below with your own migration scripts
+        let _ = manager
+            .create_type(
+                Type::create()
+                    .as_enum(ChatRole::Table)
+                    .values([ChatRole::Member, ChatRole::Admin])
+                    .to_owned()
+            ).await;
+
         manager
             .create_table(
                 Table::create()
@@ -22,6 +31,10 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .auto_increment()
                             .primary_key(),
+                    )
+                    .col(ColumnDef::new(ChatXChatRoleXProfile::ChatRole)
+                        .enumeration(ChatRole::Table, [ChatRole::Member, ChatRole::Admin])
+                        .not_null()
                     )
                     .col(ColumnDef::new(ChatXChatRoleXProfile::ChatId).big_integer().not_null())
                     .foreign_key(
@@ -35,12 +48,6 @@ impl MigrationTrait for Migration {
                             .from(ChatXChatRoleXProfile::Table, ChatXChatRoleXProfile::ProfileId)
                             .to(Profile::Table, Profile::Id)
                     )
-                    .col(ColumnDef::new(ChatXChatRoleXProfile::ChatRoleId).big_integer().not_null())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(ChatXChatRoleXProfile::Table, ChatXChatRoleXProfile::ChatRoleId)
-                            .to(ChatRole::Table, ChatRole::Id)
-                    )
                     .to_owned(),
             )
             .await
@@ -51,6 +58,10 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(Table::drop().table(ChatXChatRoleXProfile::Table).to_owned())
             .await
+
+        // manager
+        //     .drop_type(Type::drop().name("ChatRole").to_owned())
+        //     .await
     }
 }
 
@@ -58,7 +69,16 @@ impl MigrationTrait for Migration {
 pub enum ChatXChatRoleXProfile {
     Table,
     Id,
+    ChatRole,
     ChatId,
     ProfileId,
-    ChatRoleId,
+}
+
+#[derive(Iden, EnumIter)]
+pub enum ChatRole {
+    Table,
+    #[iden = "Member"]
+    Member,
+    #[iden = "Admin"]
+    Admin
 }

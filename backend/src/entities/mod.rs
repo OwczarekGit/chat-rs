@@ -4,8 +4,8 @@ pub mod prelude;
 
 pub mod account;
 pub mod chat;
-pub mod chat_role;
 pub mod chat_x_chat_role_x_profile;
 pub mod message;
 pub mod profile;
+pub mod sea_orm_active_enums;
 pub mod session;
