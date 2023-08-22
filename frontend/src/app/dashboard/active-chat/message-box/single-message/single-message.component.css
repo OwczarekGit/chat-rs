@@ -15,6 +15,8 @@
   min-width: 0;
   width: fit-content;
   max-width: min(90%, 400px);
+
+  animation: blink ease-in-out 1s;
 }
 
 .my-message {
@@ -44,4 +46,13 @@
 
 .hidden {
   display: none;
+}
+
+@keyframes blink {
+  from {
+    filter: brightness(200%);
+  }
+  to {
+    filter: none;
+  }
 }
