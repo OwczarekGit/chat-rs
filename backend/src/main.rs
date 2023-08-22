@@ -60,7 +60,7 @@ async fn main() {
         .layer(axum::middleware::from_fn_with_state(app_state.account_service.clone(), authorize_from_session_cookie))
         .nest("/api/account", endpoints::account::routes(app_state.clone()))
         .layer(cors)
-        .fallback_service(tower_http::services::ServeDir::new("./static"))
+        .fallback_service(tower_http::services::ServeFile::new("./static/index.html"))
         ;
 
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
