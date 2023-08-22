@@ -10,7 +10,7 @@ export class SoundService {
   public playNotificationSound() {
     let el = document.createElement("audio")
     el.volume = .8
-    el.src = "assets/notify.mp3"
+    el.src = "/assets/notify.mp3"
     try {
       el.play()
     } catch (err) {}

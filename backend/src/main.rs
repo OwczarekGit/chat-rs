@@ -10,6 +10,7 @@ use hyper::{StatusCode, Request};
 use sea_orm::{DatabaseConnection, Database };
 use service::account::AccountService;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::{ServeDir, ServeFile};
 use crate::service::chat::ChatService;
 use crate::service::message::MessageService;
 use crate::service::notification::NotificationService;
@@ -51,6 +52,9 @@ async fn main() {
         .allow_methods(Any)
         .allow_origin(Any);
 
+    let static_files = ServeDir::new("./static")
+        .fallback(ServeFile::new("./static/index.html"));
+
     let app = Router::new()
         .nest("/api/profile", endpoints::profile::routes())
         .nest("/api/search", endpoints::search::routes(app_state.clone()))
@@ -60,7 +64,7 @@ async fn main() {
         .layer(axum::middleware::from_fn_with_state(app_state.account_service.clone(), authorize_from_session_cookie))
         .nest("/api/account", endpoints::account::routes(app_state.clone()))
         .layer(cors)
-        .fallback_service(tower_http::services::ServeFile::new("./static/index.html"))
+        .fallback_service(static_files)
         ;
 
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
