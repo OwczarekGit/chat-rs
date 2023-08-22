@@ -1,1 +1,2 @@
+<div #top (click)="reachedTop.emit()"></div>
 <app-single-message *ngFor="let m of _messages; trackBy:track" [message]="m"></app-single-message>

@@ -1,8 +1,7 @@
-use std::cmp::Ordering;
 use axum::{Extension, Json, Router};
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::response::IntoResponse;
-use axum::routing::{get, post};
+use axum::routing::post;
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 use crate::endpoints::account::UserAccount;
@@ -13,8 +12,7 @@ use crate::service::notification::NotificationService;
 
 pub fn routes(state: AppState) -> Router {
     Router::new()
-        .route("/:id", post(send_message))
-        .route("/:id/all", get(get_all_for_chat))
+        .route("/:id", post(send_message).get(get_messages_paginated))
         .with_state(state)
 }
 
@@ -36,28 +34,34 @@ pub async fn send_message(
     Ok(())
 }
 
-pub async fn get_all_for_chat(
+pub async fn get_messages_paginated(
+    Extension(user): Extension<UserAccount>,
     State(message_service): State<MessageService>,
+    pagination: Query<Pagination>,
     Path(chat_id): Path<i64>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let mut items = message_service.get_all_for_chat(chat_id)
-        .await?
-        .into_iter()
-        .map(|e| ChatMessage::from(e))
-        .collect::<Vec<_>>();
+    let (messages, chat_id) = message_service.get_for_chat_paginated(user.id, chat_id, pagination.offset, pagination.count).await?;
 
-    items
-        .sort_by(|a,b| {
-            if a.created >= b.created {
-                Ordering::Greater
-            } else {
-                Ordering::Less
-            }
-        });
-    Ok(Json(items))
+    Ok(
+        Json(
+            messages.into_iter()
+                .map(|e|{
+                    ChatMessage::from((e, chat_id))
+                })
+                .rev()
+                .collect::<Vec<_>>()
+        )
+    )
 }
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SendMessageRequest {
     pub message: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Pagination {
+    offset: u64,
+    count: u64,
 }

@@ -19,12 +19,16 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
 
   public activeChat?: ChatEntry
 
-  public chatMembers: any
-
   @ViewChild("message_box")
   messageBox!: ElementRef<HTMLDivElement>
 
   public messages: ChatMessage[] = []
+
+  public offset: number
+  public count: number
+  public readonly pageSize: number
+  private fetchLock: boolean = false
+  private fetchedAll: boolean = false
 
   constructor(
     private route: ActivatedRoute,
@@ -33,26 +37,50 @@ export class ActiveChatComponent implements OnInit, AfterViewInit {
     private notificationService: NotificationService,
     private utilService: UtilService,
   ) {
+    this.offset = 0
+    this.count = 20
+    this.pageSize = 20
   }
 
   ngOnInit() {
     this.route.params.subscribe({
       next: value => {
         this.activeChatId = +value['id']
+        this.offset = 0
+        this.fetchLock = false
+        this.fetchedAll = false
+        this.messages = []
 
-        this.messageService.getAllMessages(this.activeChatId)
-          .subscribe({
-            next: msg => {
-              this.messages = msg
+        this.fetchNextPage()
 
-              let index = this.chatService.chatList.findIndex((c) => c.id == this.activeChatId)
-              if (index != -1)
-                this.activeChat = this.chatService.chatList[index]
-            }
-          })
-
+        let index = this.chatService.chatList.findIndex((c) => c.id == this.activeChatId)
+        if (index != -1)
+          this.activeChat = this.chatService.chatList[index]
       }
     })
+  }
+
+  public fetchNextPage() {
+    if (this.fetchLock || this.fetchedAll) {
+      return
+    }
+
+    this.fetchLock = true
+    this.messageService.getMessagesPaginated(this.activeChatId, this.count, this.offset)
+      .subscribe({
+        next: msg => {
+          this.messages.unshift(...msg)
+
+          const fetchedCount = msg.length
+
+          if (fetchedCount == 0) {
+            this.fetchedAll = true
+          }
+
+          this.offset += fetchedCount
+          this.fetchLock = false
+        }
+      })
   }
 
   public backClicked() {

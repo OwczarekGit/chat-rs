@@ -3,7 +3,10 @@
 </div>
 <div #content class="content">
   <div class="panel">
-    <app-chat-list (chatClicked)="focusChat()"></app-chat-list>
+    <app-chat-list
+      (chatClicked)="focusChat()"
+      (createChatClicked)="focusChat()"
+    ></app-chat-list>
   </div>
   <div class="main">
     <router-outlet></router-outlet>

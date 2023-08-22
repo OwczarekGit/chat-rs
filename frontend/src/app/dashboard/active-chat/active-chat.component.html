@@ -6,7 +6,7 @@
   <app-invite-applet [activeChatId]="activeChatId"></app-invite-applet>
 </div>
 <div #message_box>
-  <app-message-box [messages]="messages"></app-message-box>
+  <app-message-box (reachedTop)="fetchNextPage()" [messages]="messages"></app-message-box>
 </div>
 <div>
   <app-message-prompt (messageSend)="sendMessage($event)"></app-message-prompt>

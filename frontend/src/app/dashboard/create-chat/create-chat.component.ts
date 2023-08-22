@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ChatService} from "../../service/chat.service";
+import {UtilService} from "../../service/util.service";
 
 @Component({
   selector: 'app-create-chat',
@@ -13,7 +14,7 @@ export class CreateChatComponent {
     name: new FormControl<string>('', Validators.required)
   })
 
-  constructor(private chatService: ChatService) {
+  constructor(private chatService: ChatService, private utilService: UtilService) {
   }
 
   public createChat() {
@@ -21,5 +22,6 @@ export class CreateChatComponent {
 
     this.chatService.createChat(form.name as string)
 
+    this.utilService.backButtonClicked.next(0)
   }
 }

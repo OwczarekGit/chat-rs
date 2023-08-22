@@ -13,6 +13,9 @@ export class ChatListComponent {
   @Output('chatClicked')
   chatClickedEventEmitter: EventEmitter<any> = new EventEmitter<any>()
 
+  @Output('createChatClicked')
+  createChatClicked: EventEmitter<any> = new EventEmitter<any>()
+
   constructor(public chatService: ChatService, private router: Router) {
   }
 

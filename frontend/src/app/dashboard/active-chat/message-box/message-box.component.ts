@@ -1,4 +1,14 @@
-import {AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges, ViewChild
+} from '@angular/core';
 import {ChatMessage} from "../../../data/chat-message";
 import {NotificationService} from "../../../service/notification.service";
 
@@ -7,11 +17,18 @@ import {NotificationService} from "../../../service/notification.service";
   templateUrl: './message-box.component.html',
   styleUrls: ['./message-box.component.css']
 })
-export class MessageBoxComponent {
+export class MessageBoxComponent implements AfterViewInit {
+
+  @ViewChild('top')
+  top!: ElementRef<HTMLDivElement>
+
+  @Output()
+  reachedTop: EventEmitter<any> = new EventEmitter<any>()
+
   @Input()
   set messages(messages: ChatMessage[]) {
     this._messages = messages
-    this.scrollToBottom()
+    setTimeout(() => this.scrollToBottom(),100)
   }
 
   _messages: ChatMessage[] = []
@@ -20,6 +37,7 @@ export class MessageBoxComponent {
     private host: ElementRef<HTMLDivElement>,
     private notificationService: NotificationService,
   ) {
+
     this.notificationService.chatMessageSubject.subscribe({
       next: v => {
         this.scrollToBottom()
@@ -27,13 +45,19 @@ export class MessageBoxComponent {
     })
   }
 
+  ngAfterViewInit(): void {
+    let observer = new IntersectionObserver((e) => {
+      this.reachedTop.emit()
+    });
+
+    observer.observe(this.top.nativeElement)
+  }
+
   public track(index: number, msg: ChatMessage) {
     return msg.id
   }
 
   public scrollToBottom() {
-    setTimeout(() => {
-      this.host.nativeElement.scrollTop = this.host.nativeElement.scrollHeight + 100
-    },0)
+    this.host.nativeElement.scrollTop = this.host.nativeElement.scrollHeight
   }
 }
