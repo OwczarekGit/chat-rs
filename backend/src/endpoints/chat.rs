@@ -56,9 +56,7 @@ pub async fn invite_to_chat(
         body: {}
     };
 
-    let message = serde_json::to_string(&message).expect("");
-
-    notification_service.send_notification(request.user_id, &message).await;
+    notification_service.send_notification(request.user_id, message).await;
 
     Ok(())
 }

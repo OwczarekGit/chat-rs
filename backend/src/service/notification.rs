@@ -6,6 +6,7 @@ use axum::response::sse::Event;
 use axum_macros::FromRef;
 use futures::{SinkExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use serde::Serialize;
 use tokio::sync::{RwLock};
 use crate::entities::{*, prelude::*};
 
@@ -30,13 +31,15 @@ impl NotificationService {
         rx
     }
 
-    pub async fn send_notification(&mut self, user_id: i64, message: &str) {
+    pub async fn send_notification(&mut self, user_id: i64, message: impl Serialize + Clone) {
         if let Some(channel) = self.notification_channels.write().await.get_mut(&user_id) {
-            let _ = channel.send(Event::default().data(message).try_into()).await;
+            if let Ok(event) = Event::default().json_data(message) {
+                let _ = channel.send(Ok(event)).await;
+            }
         }
     }
 
-    pub async fn notify_all_chat_members(&mut self, chat_id: i64, message: &str) -> Result<(), StatusCode> {
+    pub async fn notify_all_chat_members(&mut self, chat_id: i64, message: impl Serialize + Clone) -> Result<(), StatusCode> {
         let chat = Chat::find_by_id(chat_id)
             .one(&self.db)
             .await
@@ -53,7 +56,7 @@ impl NotificationService {
             ;
 
         for chat in chats {
-            self.send_notification(chat.profile_id, message).await;
+            self.send_notification(chat.profile_id, message.clone()).await;
         }
 
         Ok(())
