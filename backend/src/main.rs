@@ -14,6 +14,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use crate::service::chat::ChatService;
 use crate::service::message::MessageService;
 use crate::service::notification::NotificationService;
+use crate::service::profile::ProfileService;
 use crate::service::search::SearchService;
 
 mod entities;
@@ -34,6 +35,7 @@ pub struct AppState {
     message_service: MessageService,
     search_service:  SearchService,
     notification_service: NotificationService,
+    profile_service: ProfileService,
 }
 
 #[tokio::main]
@@ -46,6 +48,7 @@ async fn main() {
         message_service: MessageService::new(connection.clone()),
         notification_service: NotificationService::new(connection.clone()),
         search_service: SearchService::new(connection.clone()),
+        profile_service: ProfileService::new(connection.clone()),
     };
 
     let cors = CorsLayer::new()
@@ -56,7 +59,7 @@ async fn main() {
         .fallback(ServeFile::new("./static/index.html"));
 
     let app = Router::new()
-        .nest("/api/profile", endpoints::profile::routes())
+        .nest("/api/profile", endpoints::profile::routes(app_state.clone()))
         .nest("/api/search", endpoints::search::routes(app_state.clone()))
         .nest("/api/chat", endpoints::chat::routes(app_state.clone()))
         .nest("/api/message", endpoints::message::routes(app_state.clone()))
