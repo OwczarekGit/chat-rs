@@ -42,7 +42,7 @@
   border-radius: 4px;
   background-color: var(--color-text);
   position: absolute;
-  transform-origin: 1px 50%;
+  transform-origin: 2px 50%;
   transform: rotateZ(45deg);
 }
 

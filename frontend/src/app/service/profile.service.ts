@@ -12,9 +12,20 @@ export class ProfileService {
 
   constructor(private http: HttpClient) { }
 
-  public getMyProfile() {
+  public getMyProfile(handler?: (profile: UserProfile) => void) {
     this.http.get<UserProfile>("/api/profile/me").subscribe({
-      next: value => this.currentUser = value
+      next: value =>
+      {
+        this.currentUser = value
+        if (handler != null)
+          handler(value)
+      }
     })
+  }
+
+  public changeUsername(username: string) {
+    this.http.put("/api/profile", {
+      username: username
+    }).subscribe()
   }
 }

@@ -25,7 +25,6 @@
   animation: none;
 }
 
-
 .message:hover {
   filter: brightness(110%);
 }
@@ -52,8 +51,12 @@
 @keyframes blink {
   from {
     filter: brightness(200%);
+    transform: scale(110%);
+    opacity: 0.7;
   }
   to {
     filter: none;
+    transform: none;
+    opacity: 1.0;
   }
 }

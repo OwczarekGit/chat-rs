@@ -17,6 +17,7 @@ import { MessagePromptComponent } from './dashboard/active-chat/message-prompt/m
 import { MessageBoxComponent } from './dashboard/active-chat/message-box/message-box.component';
 import { SingleMessageComponent } from './dashboard/active-chat/message-box/single-message/single-message.component';
 import { InviteAppletComponent } from './dashboard/active-chat/invite-applet/invite-applet.component';
+import { UsernameChangeComponent } from './dashboard/bar/username-change/username-change.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { InviteAppletComponent } from './dashboard/active-chat/invite-applet/inv
     MessagePromptComponent,
     MessageBoxComponent,
     SingleMessageComponent,
-    InviteAppletComponent
+    InviteAppletComponent,
+    UsernameChangeComponent
   ],
   imports: [
     BrowserModule,
